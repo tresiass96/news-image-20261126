@@ -1,4 +1,4 @@
-// news-image-20261126 — entry program (v3: 36-story front page).
+// news-image-20261126 — entry program (v4: 21-story front page, v2 frame).
 // Copies the pre-rendered front page (entry.png) to the output directory.
 // The image is drawn once, at build time, and shipped in the repository;
 // this program only places the exact bytes at /output/entry.png, so the
@@ -8,6 +8,9 @@
 // so a truncated or corrupted image fails loudly instead of being scored.
 // It also checks the IHDR: 1024x1024, 8-bit truecolour (colour type 2),
 // no interlace — the exact format the headless-Chromium render produces.
+// A file far smaller than a real front page (under 100 KB) is rejected too:
+// a degenerate render must never be submitted as if it were the page.
+// (v4 verified render: 318,433 bytes, sha256 2dcab2bd…; two runs identical.)
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,6 +40,7 @@ function crc32(buf: Buffer): number {
 // the first chunk must be IHDR (1024x1024), and the file must end at IEND.
 function validatePng(buf: Buffer): void {
   if (buf.length > 1048576) throw new Error(`entry.png too large: ${buf.length} bytes`);
+  if (buf.length < 100000) throw new Error(`entry.png suspiciously small: ${buf.length} bytes`);
   if (buf.subarray(0, 8).toString("hex") !== "89504e470d0a1a0a") {
     throw new Error("entry.png is not a PNG");
   }
