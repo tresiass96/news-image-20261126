@@ -1,4 +1,4 @@
-// news-image-20261126 — entry program.
+// news-image-20261126 — entry program (v3: 36-story front page).
 // Copies the pre-rendered front page (entry.png) to the output directory.
 // The image is drawn once, at build time, and shipped in the repository;
 // this program only places the exact bytes at /output/entry.png, so the
@@ -6,6 +6,8 @@
 //
 // Before copying, the program walks every PNG chunk and checks its CRC-32,
 // so a truncated or corrupted image fails loudly instead of being scored.
+// It also checks the IHDR: 1024x1024, 8-bit truecolour (colour type 2),
+// no interlace — the exact format the headless-Chromium render produces.
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -54,6 +56,12 @@ function validatePng(buf: Buffer): void {
       const w = data.readUInt32BE(0);
       const h = data.readUInt32BE(4);
       if (w !== 1024 || h !== 1024) throw new Error(`unexpected size ${w}x${h}`);
+      const bitDepth = data[8];
+      const colorType = data[9];
+      if (bitDepth !== 8 || colorType !== 2) {
+        throw new Error(`unexpected IHDR format bitDepth=${bitDepth} colorType=${colorType}`);
+      }
+      if (data[12] !== 0) throw new Error("interlaced PNG not expected");
       first = false;
     }
     if (type === "IEND") {
