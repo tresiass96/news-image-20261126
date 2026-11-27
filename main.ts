@@ -1,4 +1,6 @@
-// news-image-20261126 — entry program (v4: 21-story front page, v2 frame).
+// news-image-20261126 — entry program (v5: v4 frame, Bogor hero corrected
+// 16/10 → 13/13 — the official toll that held: Reuters, BBC, AP; 16/10 was a
+// transient Thu report, not confirmed by later official statements).
 // Copies the pre-rendered front page (entry.png) to the output directory.
 // The image is drawn once, at build time, and shipped in the repository;
 // this program only places the exact bytes at /output/entry.png, so the
@@ -10,7 +12,12 @@
 // no interlace — the exact format the headless-Chromium render produces.
 // A file far smaller than a real front page (under 100 KB) is rejected too:
 // a degenerate render must never be submitted as if it were the page.
-// (v4 verified render: 318,433 bytes, sha256 2dcab2bd…; two runs identical.)
+// (v5 verified render: 318,332 bytes, sha256
+// 5a47908aca58db4ee72de512b59d1cdcf2c11c25333be8ea1efecc2e5f292c92;
+// two Chromium renders byte-identical, footBottom 1023/1024, 0 truncations;
+// main.ts two runs byte-identical; 1-byte corruption rejected with CRC error.
+// Bogor correction verified 27 Nov 12:16 WIB: Reuters + BBC + AP + NYT + Al
+// Jazeera all 13/13; The Daily Context corrected its own 16/10 article.)
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
